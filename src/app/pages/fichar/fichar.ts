@@ -7,11 +7,12 @@ import { SettingsService } from '../../core/settings.service';
 import { Horario, Sentido } from '../../core/config';
 import { totalRange } from '../../core/schedule-math';
 import { formatDuration, localDateString, localDateTimeString } from '../../core/date-utils';
+import { VoltDatepicker } from '../../shared/datepicker';
 
 @Component({
   selector: 'volt-fichar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, VoltDatepicker],
   template: `
     <header class="pagehead rise">
       <div>
@@ -33,10 +34,10 @@ import { formatDuration, localDateString, localDateTimeString } from '../../core
         <div class="divider"></div>
 
         <form (ngSubmit)="sendQuick()">
-          <label class="grp">
+          <div class="grp">
             <span class="label">Fecha y hora</span>
-            <input class="field" type="datetime-local" [(ngModel)]="fecha" name="fecha" required [disabled]="qBusy()" />
-          </label>
+            <volt-datepicker [(value)]="fecha" [withTime]="true" placeholder="Selecciona fecha y hora" />
+          </div>
 
           <div class="grp">
             <span class="label">Sentido</span>
@@ -77,10 +78,10 @@ import { formatDuration, localDateString, localDateTimeString } from '../../core
         <div class="divider"></div>
 
         <form (ngSubmit)="sendDay()">
-          <label class="grp">
+          <div class="grp">
             <span class="label">Día</span>
-            <input class="field" type="date" [(ngModel)]="dia" name="dia" required [disabled]="dBusy()" />
-          </label>
+            <volt-datepicker [(value)]="dia" />
+          </div>
 
           <div class="grp">
             <div class="grphead">

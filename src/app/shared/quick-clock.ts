@@ -15,6 +15,7 @@ import { ToastService } from '../core/toast.service';
 import { SettingsService } from '../core/settings.service';
 import { Sentido } from '../core/config';
 import { formatTime, localDateString } from '../core/date-utils';
+import { VoltDatepicker } from './datepicker';
 
 /**
  * Quick clock-in panel for the dashboard. The primary action posts a marcaje
@@ -25,7 +26,7 @@ import { formatTime, localDateString } from '../core/date-utils';
 @Component({
   selector: 'volt-quick-clock',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, VoltDatepicker],
   template: `
     <section class="panel ticked qc">
       <div class="chrome">
@@ -117,12 +118,7 @@ import { formatTime, localDateString } from '../core/date-utils';
                   <option [value]="h.key">{{ h.label }}</option>
                 }
               </select>
-              <input
-                class="field datef"
-                type="date"
-                [(ngModel)]="dia"
-                aria-label="Día a fichar"
-              />
+              <volt-datepicker class="datef" [(value)]="dia" />
             </div>
 
             <button
@@ -363,7 +359,7 @@ import { formatTime, localDateString } from '../core/date-utils';
         gap: 0.5rem;
       }
       .datef {
-        width: auto;
+        width: 11.5rem;
       }
       .noned {
         font-family: var(--font-mono);

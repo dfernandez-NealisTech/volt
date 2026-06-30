@@ -1,19 +1,14 @@
 # ⚡ VOLT
 
-Control de marcajes (fichajes) para `lupe.nunsys.com`. Reescritura de la PoC
-(vanilla JS + Bootstrap + Highcharts) como app **Angular 21** con estética
-**noir / flat / eléctrica**.
+Control de marcajes (fichajes) para `lupe.nunsys.com`.
 
 ## Stack
 
 - **Angular 21** standalone + zoneless + signals, lazy routing con
   _view transitions_.
 - **TailwindCSS v4** (vía PostCSS) + un pequeño sistema de diseño propio en
-  `src/styles.css`. Sin librerías de componentes pesadas (nada de PrimeNG).
-- **Gráfico de línea temporal hecho a medida** (SVG/CSS) — sin Highcharts.
+  `src/styles.css`. Sin librerías de componentes.
 - Tipografías: _Space Grotesk_ (UI) + _JetBrains Mono_ (datos).
-
-Bundle inicial ≈ **76 kB** comprimido.
 
 ## Estructura
 
@@ -29,7 +24,7 @@ src/app/
 
 ## Secciones
 
-- **Login** — acceso noir con destellos y marca de agua del rayo.
+- **Login** — acceso.
 - **Semana** (`/dashboard`) — métricas + línea temporal semanal animada
   (las barras "se cargan", la jornada en curso late en cian, con marcador de
   "ahora"). Navegación por semanas. Incluye un **fichaje rápido**: un botón
@@ -45,9 +40,6 @@ src/app/
   valor aleatorio dentro del rango, de modo que con _P_ tramos el total queda en
   `[nominal + P·min, nominal + P·max]` (p. ej. 8–9 y 10–11 con ±5 min →
   **1h 50m – 2h 10m**). Todo se persiste en `localStorage`.
-
-Tema claro/oscuro con transición "surge" eléctrica (View Transitions API),
-noir por defecto.
 
 ## Desarrollo
 

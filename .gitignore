@@ -39,6 +39,40 @@ testem.log
 /typings
 __screenshots__/
 
+# Local env & secrets
+.env
+.env.*
+!.env.example
+
+# Logs & debug
+*.log
+logs/
+pnpm-debug.log*
+
+# TypeScript / build info
+*.tsbuildinfo
+.tscache/
+
+# Alternate package managers (this project uses npm + package-lock.json)
+yarn.lock
+pnpm-lock.yaml
+.pnpm-store/
+
+# Test / e2e artifacts
+/playwright-report
+/test-results
+/.nyc_output
+
+# Editor swap & backup files
+*.swp
+*.swo
+*~
+
 # System files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.Spotlight-V100
+.Trashes

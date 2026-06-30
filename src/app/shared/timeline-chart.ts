@@ -182,12 +182,6 @@ import {
         animation: charge 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
         transform-origin: left center;
       }
-      .bar::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        box-shadow: 0 0 14px -2px var(--volt-glow);
-      }
       .bar.open {
         background: repeating-linear-gradient(
           90deg,

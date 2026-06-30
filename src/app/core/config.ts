@@ -46,7 +46,7 @@ export const RANDOMNESS_BOUNDS = { min: -30, max: 30 } as const;
 export const DEFAULT_HORARIOS: Horario[] = [
   {
     key: 'normal',
-    label: 'Normal · 08:00–14:00 · 14:45–17:30',
+    label: 'Normal',
     short: 'NORMAL',
     teletrabajo: false,
     marcajes: [
@@ -58,7 +58,7 @@ export const DEFAULT_HORARIOS: Horario[] = [
   },
   {
     key: 'teletrabajo',
-    label: 'Teletrabajo · 07:45–14:00 · 14:45–17:15',
+    label: 'Teletrabajo',
     short: 'REMOTO',
     teletrabajo: true,
     marcajes: [
@@ -70,7 +70,7 @@ export const DEFAULT_HORARIOS: Horario[] = [
   },
   {
     key: 'viernes',
-    label: 'Viernes / verano · 08:00–14:30',
+    label: 'Viernes / verano',
     short: 'VIERNES',
     teletrabajo: false,
     marcajes: [

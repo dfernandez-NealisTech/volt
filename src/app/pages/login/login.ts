@@ -5,14 +5,15 @@ import { AuthService } from '../../core/auth.service';
 import { ToastService } from '../../core/toast.service';
 import { VoltLogo } from '../../shared/volt-logo';
 import { ThemeToggle } from '../../shared/theme-toggle';
+import { PalettePicker } from '../../shared/palette-picker';
 
 @Component({
   selector: 'volt-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, VoltLogo, ThemeToggle],
+  imports: [FormsModule, VoltLogo, ThemeToggle, PalettePicker],
   template: `
     <div class="scene">
-      <div class="corner"><theme-toggle /></div>
+      <div class="corner"><palette-picker /><theme-toggle /></div>
 
       <!-- ambient -->
       <div class="bolt-bg" aria-hidden="true">
@@ -90,6 +91,9 @@ import { ThemeToggle } from '../../shared/theme-toggle';
         top: 1.2rem;
         right: 1.2rem;
         z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
       .bolt-bg {
         position: absolute;

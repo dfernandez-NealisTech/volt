@@ -72,6 +72,86 @@
 }
 
 /* ============================================================
+   PALETTE · BLUE  (same neutrals as volt, blue primary)
+   ============================================================ */
+[data-palette='blue'][data-theme='dark'] {
+  --volt: #3d8bff;
+  --volt-ink: #74a8ff;
+  --volt-glow: rgba(61, 139, 255, 0.55);
+  --on-volt: #ffffff;
+  --scan: rgba(61, 139, 255, 0.04);
+  /* blueprint grid */
+  --bp-minor: rgba(61, 139, 255, 0.04);
+  --bp-major: rgba(61, 139, 255, 0.085);
+  --bp-node: rgba(61, 139, 255, 0.18);
+}
+[data-palette='blue'][data-theme='light'] {
+  --volt: #2f6bff;
+  --volt-ink: #1f54d6;
+  --volt-glow: rgba(47, 107, 255, 0.42);
+  --on-volt: #ffffff;
+  --scan: rgba(47, 107, 255, 0.05);
+  /* blueprint grid */
+  --bp-minor: rgba(47, 107, 255, 0.045);
+  --bp-major: rgba(47, 107, 255, 0.09);
+  --bp-node: rgba(47, 107, 255, 0.17);
+}
+
+/* ============================================================
+   PALETTE · PASTEL  (magenta → pink-red, soft tones, rounded)
+   ============================================================ */
+[data-palette='pastel'][data-theme='dark'] {
+  --bg: #16121b;
+  --bg-2: #1e1825;
+  --bg-3: #271f30;
+  --line: rgba(255, 235, 245, 0.09);
+  --line-strong: rgba(255, 235, 245, 0.18);
+  --text: #efe6ef;
+  --text-dim: #a99fb2;
+  --text-faint: #6f6677;
+
+  --volt: #ff86b0;
+  --volt-ink: #ffa6c4;
+  --volt-glow: rgba(255, 134, 176, 0.5);
+  --cyan: #b0a6ff; /* pastel periwinkle secondary */
+  --danger: #ff8a99;
+
+  --grid: rgba(255, 235, 245, 0.025);
+  --on-volt: #2a1822;
+  --scan: rgba(255, 134, 176, 0.05);
+  --radius: 12px;
+  /* soft pastel mesh blobs */
+  --blob-a: rgba(255, 134, 176, 0.13);
+  --blob-b: rgba(176, 166, 255, 0.12);
+  --blob-c: rgba(255, 190, 150, 0.08);
+}
+[data-palette='pastel'][data-theme='light'] {
+  --bg: #fdf4f8;
+  --bg-2: #ffffff;
+  --bg-3: #ffffff;
+  --line: rgba(70, 25, 50, 0.1);
+  --line-strong: rgba(70, 25, 50, 0.2);
+  --text: #2c2030;
+  --text-dim: #7a6c78;
+  --text-faint: #b3a3b0;
+
+  --volt: #ff7faa;
+  --volt-ink: #cf4f82; /* readable pink-red on white */
+  --volt-glow: rgba(255, 127, 170, 0.42);
+  --cyan: #7c6fd6; /* pastel violet */
+  --danger: #e85d72;
+
+  --grid: rgba(70, 25, 50, 0.03);
+  --on-volt: #3a1326;
+  --scan: rgba(255, 127, 170, 0.06);
+  --radius: 12px;
+  /* soft pastel mesh blobs */
+  --blob-a: rgba(255, 127, 170, 0.22);
+  --blob-b: rgba(124, 111, 214, 0.14);
+  --blob-c: rgba(255, 178, 120, 0.13);
+}
+
+/* ============================================================
    Base
    ============================================================ */
 * {
@@ -119,6 +199,66 @@ body::after {
   opacity: 0.1;
 }
 
+/* ---- BLUE · blueprint grid (minor + major lines + intersection nodes) ---- */
+[data-palette='blue'] body::before {
+  background-image:
+    radial-gradient(circle at 0 0, var(--bp-node) 1.4px, transparent 1.8px),
+    linear-gradient(var(--bp-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-major) 1px, transparent 1px),
+    linear-gradient(var(--bp-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-minor) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  -webkit-mask-image: radial-gradient(ellipse 110% 90% at 50% 0%, #000 45%, transparent 92%);
+  mask-image: radial-gradient(ellipse 110% 90% at 50% 0%, #000 45%, transparent 92%);
+}
+
+/* ---- BLUE · dashed "cut line" frame instead of corner crops ---- */
+[data-palette='blue'] .ticked::before {
+  inset: 5px;
+  width: auto;
+  height: auto;
+  border: 1px dashed var(--volt);
+  opacity: 0.42;
+}
+[data-palette='blue'] .ticked::after {
+  display: none;
+}
+
+/* ---- PASTEL · soft mesh of blurred colour blobs ---- */
+[data-palette='pastel'] body::before {
+  background-image:
+    radial-gradient(50% 45% at 10% 6%, var(--blob-a), transparent 72%),
+    radial-gradient(48% 44% at 94% 92%, var(--blob-b), transparent 72%),
+    radial-gradient(42% 40% at 78% 14%, var(--blob-c), transparent 75%);
+  background-size: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+[data-palette='pastel'] body::after {
+  opacity: 0.04;
+}
+
+/* ---- PASTEL · glassmorphism cards ---- */
+[data-palette='pastel'] .panel {
+  background: color-mix(in srgb, var(--bg-2) 56%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
+    0 10px 30px -18px rgba(40, 10, 30, 0.5);
+}
+
+/* ============================================================
+   Per-palette typography
+   ============================================================ */
+[data-palette='blue'] {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+[data-palette='pastel'] {
+  --font-sans: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+
 ::selection {
   background: var(--volt);
   color: var(--on-volt);
@@ -150,9 +290,14 @@ body::after {
     position: relative;
     background: var(--bg-2);
     border: 1px solid var(--line);
+    border-radius: var(--radius);
   }
 
-  /* corner ticks — instrument-panel flavor */
+  /* corner ticks — instrument-panel flavor (hidden when rounded) */
+  [data-palette='pastel'] .ticked::before,
+  [data-palette='pastel'] .ticked::after {
+    display: none;
+  }
   .ticked::before,
   .ticked::after {
     content: '';
@@ -193,6 +338,7 @@ body::after {
     font-family: var(--font-mono);
     font-size: 0.9rem;
     outline: none;
+    border-radius: var(--radius);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   }
   .field:focus {
@@ -235,6 +381,7 @@ body::after {
     color: var(--text);
     cursor: pointer;
     overflow: hidden;
+    border-radius: var(--radius);
     transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease,
       transform 0.08s ease, box-shadow 0.3s ease;
   }

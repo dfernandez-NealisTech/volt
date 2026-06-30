@@ -198,6 +198,8 @@ import { VoltDatepicker } from '../../shared/datepicker';
         display: grid;
         grid-template-columns: 1fr 1fr;
         border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        overflow: hidden;
       }
       .seg button {
         padding: 0.6rem;

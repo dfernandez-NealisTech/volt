@@ -35,6 +35,7 @@ import { ToastService } from '../core/toast.service';
         font-size: 0.85rem;
         cursor: pointer;
         overflow: hidden;
+        border-radius: var(--radius);
         box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.6);
       }
       .bar {

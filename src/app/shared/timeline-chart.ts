@@ -179,6 +179,7 @@ import {
         background: var(--volt);
         z-index: 2;
         overflow: visible;
+        border-radius: var(--radius);
         animation: charge 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
         transform-origin: left center;
       }

@@ -260,6 +260,8 @@ import { RangeSlider } from '../../shared/range-slider';
         display: inline-grid;
         grid-auto-flow: column;
         border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        overflow: hidden;
       }
       .seg button {
         padding: 0.45rem 0.8rem;

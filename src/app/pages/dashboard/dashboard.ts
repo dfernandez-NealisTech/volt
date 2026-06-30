@@ -114,6 +114,10 @@ import { QuickClock } from '../../shared/quick-clock';
         gap: 1px;
         margin-bottom: 1.5rem;
       }
+      /* pastel: glass cards read better with breathing room */
+      :host-context([data-palette='pastel']) .stats {
+        gap: 0.7rem;
+      }
       .stat {
         display: flex;
         flex-direction: column;

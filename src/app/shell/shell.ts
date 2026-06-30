@@ -4,11 +4,12 @@ import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
 import { VoltLogo } from '../shared/volt-logo';
 import { ThemeToggle } from '../shared/theme-toggle';
+import { PalettePicker } from '../shared/palette-picker';
 
 @Component({
   selector: 'volt-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, VoltLogo, ThemeToggle],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, VoltLogo, ThemeToggle, PalettePicker],
   template: `
     <div class="layout">
       <!-- ===== rail ===== -->
@@ -57,7 +58,10 @@ import { ThemeToggle } from '../shared/theme-toggle';
         </nav>
 
         <div class="foot">
-          <theme-toggle />
+          <div class="foot-controls">
+            <theme-toggle />
+            <palette-picker />
+          </div>
           <button type="button" class="logout" (click)="logout()" title="Cerrar sesión">
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
               <path d="M14 7V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2" />
@@ -170,13 +174,19 @@ import { ThemeToggle } from '../shared/theme-toggle';
       }
       .foot {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: stretch;
         gap: 0.6rem;
         padding-top: 1rem;
         border-top: 1px solid var(--line);
       }
+      .foot-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
       .logout {
-        flex: 1;
+        width: 100%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -259,6 +269,8 @@ import { ThemeToggle } from '../shared/theme-toggle';
           transform: translateX(-50%) scaleX(1);
         }
         .foot {
+          flex-direction: row;
+          align-items: center;
           padding: 0;
           border: none;
           gap: 0.4rem;
@@ -267,7 +279,6 @@ import { ThemeToggle } from '../shared/theme-toggle';
           display: none;
         }
         .logout {
-          flex: 0;
           width: 2.3rem;
           padding: 0;
         }

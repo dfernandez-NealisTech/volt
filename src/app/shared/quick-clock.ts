@@ -187,6 +187,7 @@ import { VoltDatepicker } from './datepicker';
         flex: 1;
         min-width: 0;
         padding: 1.5rem 1.1rem;
+        border-radius: var(--radius);
         background: var(--volt);
         border: 1px solid var(--volt);
         color: var(--on-volt);
@@ -277,6 +278,7 @@ import { VoltDatepicker } from './datepicker';
         padding: 1.5rem 1.1rem;
         background: transparent;
         border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
         color: var(--text-dim);
         text-align: left;
         cursor: pointer;
@@ -325,6 +327,8 @@ import { VoltDatepicker } from './datepicker';
         display: inline-grid;
         grid-auto-flow: column;
         border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        overflow: hidden;
       }
       .seg button {
         padding: 0.4rem 0.85rem;

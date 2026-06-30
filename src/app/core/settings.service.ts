@@ -9,11 +9,23 @@ import {
 
 const SCHEDULES_KEY = 'volt-schedules';
 const RANDOMNESS_KEY = 'volt-randomness';
+const PREFS_KEY = 'volt-prefs';
+
+/** Remembered UI selections (not core data). */
+export interface Prefs {
+  /** Last schedule picked for "full day" quick actions. */
+  quickScheduleKey: string;
+  /** Last teletrabajo choice for the quick clock-in. */
+  quickTeletrabajo: boolean;
+}
+
+const DEFAULT_PREFS: Prefs = { quickScheduleKey: '', quickTeletrabajo: false };
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
   readonly schedules = signal<Horario[]>(this.loadSchedules());
   readonly randomness = signal<RandomnessRange>(this.loadRandomness());
+  readonly prefs = signal<Prefs>(this.loadPrefs());
 
   constructor() {
     effect(() => {
@@ -32,6 +44,28 @@ export class SettingsService {
         /* ignore */
       }
     });
+    effect(() => {
+      const p = this.prefs();
+      try {
+        localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+      } catch {
+        /* ignore */
+      }
+    });
+  }
+
+  private loadPrefs(): Prefs {
+    try {
+      const raw = localStorage.getItem(PREFS_KEY);
+      if (raw) return { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) };
+    } catch {
+      /* ignore */
+    }
+    return { ...DEFAULT_PREFS };
+  }
+
+  setPref<K extends keyof Prefs>(key: K, value: Prefs[K]) {
+    this.prefs.update((p) => ({ ...p, [key]: value }));
   }
 
   private loadSchedules(): Horario[] {

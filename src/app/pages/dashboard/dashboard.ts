@@ -1,16 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { MarcajesService } from '../../core/marcajes.service';
 import { ToastService } from '../../core/toast.service';
 import { Marcaje } from '../../core/models';
 import { formatDuration, formatTime, weekRangeLabel } from '../../core/date-utils';
 import { buildWeekModel } from '../../core/week-data';
 import { VoltTimeline } from '../../shared/timeline-chart';
+import { QuickClock } from '../../shared/quick-clock';
 
 @Component({
   selector: 'volt-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [VoltTimeline, RouterLink],
+  imports: [VoltTimeline, QuickClock],
   template: `
     <header class="pagehead rise">
       <div>
@@ -45,11 +45,11 @@ import { VoltTimeline } from '../../shared/timeline-chart';
         </span>
         <span class="meta">{{ lastLabel() }}</span>
       </div>
-      <a class="stat panel cta rise" routerLink="/fichar" style="animation-delay:.2s">
-        <span class="label">Acción</span>
-        <span class="big">Fichar →</span>
-        <span class="meta">marcaje o día completo</span>
-      </a>
+      <div class="stat panel ticked rise" style="animation-delay:.2s">
+        <span class="label">Media / día</span>
+        <span class="big mono">{{ daysWorked() > 0 ? fmt(avgMs()) : '—' }}</span>
+        <span class="meta">{{ daysWorked() }} {{ daysWorked() === 1 ? 'día fichado' : 'días fichados' }}</span>
+      </div>
     </section>
 
     <!-- timeline -->
@@ -63,9 +63,14 @@ import { VoltTimeline } from '../../shared/timeline-chart';
       </div>
       <volt-timeline [data]="marcajes()" [baseDate]="baseDate()" [loading]="loading()" />
       @if (!loading() && week().weekTotalMs === 0) {
-        <p class="empty">Sin marcajes esta semana.</p>
+        <div class="empty"><span>Sin marcajes esta semana.</span></div>
       }
     </section>
+
+    <!-- quick clock-in -->
+    <div class="quick rise" style="animation-delay:.3s">
+      <volt-quick-clock [working]="working()" (changed)="load()" />
+    </div>
   `,
   styles: [
     `
@@ -151,18 +156,6 @@ import { VoltTimeline } from '../../shared/timeline-chart';
         box-shadow: 0 0 10px var(--volt-glow);
         animation: pulse-glow 1.6s ease-in-out infinite;
       }
-      .cta {
-        text-decoration: none;
-        color: var(--text);
-        transition: background 0.2s ease, color 0.2s ease;
-      }
-      .cta:hover {
-        background: color-mix(in srgb, var(--volt) 9%, transparent);
-        color: var(--volt-ink);
-      }
-      .cta .big {
-        color: var(--volt-ink);
-      }
       .chartpanel {
         padding: 1.3rem 1.4rem 1.6rem;
       }
@@ -197,11 +190,27 @@ import { VoltTimeline } from '../../shared/timeline-chart';
         background: repeating-linear-gradient(90deg, var(--cyan) 0 4px, transparent 4px 7px);
       }
       .empty {
-        margin: 1.4rem 0 0.2rem;
-        text-align: center;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 3.2rem;
+        bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+      .empty span {
         font-family: var(--font-mono);
         font-size: 0.72rem;
+        letter-spacing: 0.06em;
         color: var(--text-faint);
+        background: color-mix(in srgb, var(--bg-2) 88%, transparent);
+        border: 1px solid var(--line);
+        padding: 0.45rem 0.9rem;
+      }
+      .quick {
+        margin-top: 1.5rem;
       }
       @media (max-width: 860px) {
         .stats {
@@ -228,6 +237,11 @@ export class DashboardPage {
   protected week = computed(() => buildWeekModel(this.marcajes(), this.baseDate()));
   protected today = computed(() => this.week().days.find((d) => d.isToday) ?? null);
   protected todayMs = computed(() => this.today()?.totalMs ?? 0);
+  protected daysWorked = computed(() => this.week().days.filter((d) => d.totalMs > 0).length);
+  protected avgMs = computed(() => {
+    const n = this.daysWorked();
+    return n > 0 ? this.week().weekTotalMs / n : 0;
+  });
 
   protected working = computed(() => this.marcajes()[0]?.sentido === 'ENTRADA');
   protected lastLabel = computed(() => {

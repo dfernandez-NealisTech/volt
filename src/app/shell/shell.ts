@@ -204,7 +204,7 @@ import { ThemeToggle } from '../shared/theme-toggle';
       }
       .content {
         min-width: 0;
-        padding: 2.4rem clamp(1.2rem, 4vw, 3.2rem) 4rem;
+        padding: 2.4rem clamp(1.2rem, 4vw, 3.2rem) 2rem;
       }
       .inner {
         max-width: 1080px;

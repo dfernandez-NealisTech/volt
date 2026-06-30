@@ -32,7 +32,11 @@ src/app/
 - **Login** — acceso noir con destellos y marca de agua del rayo.
 - **Semana** (`/dashboard`) — métricas + línea temporal semanal animada
   (las barras "se cargan", la jornada en curso late en cian, con marcador de
-  "ahora"). Navegación por semanas.
+  "ahora"). Navegación por semanas. Incluye un **fichaje rápido**: un botón
+  grande que ficha _ahora_ detectando solo si toca entrada o salida según el
+  estado actual, más un atajo de "día completo" con el horario recordado. Al
+  fichar, la semana se recarga al instante. Las selecciones (horario y
+  teletrabajo) se recuerdan en `localStorage` (`volt-prefs`).
 - **Fichar** (`/fichar`) — marcaje puntual y "día completo". Cada horario
   muestra en todo momento el total resultante (min–max).
 - **Ajustes** (`/ajustes`) — editor de horarios (añadir/quitar horarios y

@@ -173,6 +173,7 @@
   --grid: rgba(255, 180, 120, 0.025);
   --on-volt: #1a0d05;
   --scan: rgba(255, 125, 43, 0.05);
+  --radius: 5px;
   /* flame glow blobs anchored at the bottom */
   --flame-core: rgba(255, 120, 30, 0.2);
   --flame-a: rgba(255, 70, 20, 0.14);
@@ -197,6 +198,7 @@
   --grid: rgba(120, 55, 15, 0.03);
   --on-volt: #ffffff;
   --scan: rgba(237, 92, 12, 0.06);
+  --radius: 5px;
   --flame-core: rgba(255, 120, 30, 0.22);
   --flame-a: rgba(255, 90, 25, 0.16);
   --flame-b: rgba(255, 175, 60, 0.14);

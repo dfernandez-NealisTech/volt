@@ -246,6 +246,26 @@ import {
           opacity: 0.55;
         }
       }
+
+      /* ---- FIRE theme: bars glow like heated embers ---- */
+      :host-context([data-palette='fire']) .bar {
+        background: linear-gradient(
+          90deg,
+          #c2340a 0%,
+          var(--volt) 55%,
+          var(--cyan) 100%
+        );
+        box-shadow: 0 0 10px -2px var(--volt-glow),
+          inset 0 0 4px rgba(255, 220, 150, 0.28);
+      }
+      :host-context([data-palette='fire']) .bar.open {
+        background: repeating-linear-gradient(
+          90deg,
+          var(--cyan) 0 7px,
+          transparent 7px 12px
+        );
+        box-shadow: 0 0 12px -1px var(--volt-glow);
+      }
     `,
   ],
 })

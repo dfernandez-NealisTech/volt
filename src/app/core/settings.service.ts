@@ -17,9 +17,15 @@ export interface Prefs {
   quickScheduleKey: string;
   /** Last teletrabajo choice for the quick clock-in. */
   quickTeletrabajo: boolean;
+  /** Whether the quick clock-in card is flipped to its manual-marcaje face. */
+  quickManualMode: boolean;
 }
 
-const DEFAULT_PREFS: Prefs = { quickScheduleKey: '', quickTeletrabajo: false };
+const DEFAULT_PREFS: Prefs = {
+  quickScheduleKey: '',
+  quickTeletrabajo: false,
+  quickManualMode: false,
+};
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {

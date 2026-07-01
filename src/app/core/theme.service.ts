@@ -1,11 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 
 export type Theme = 'dark' | 'light';
-export type Palette = 'volt' | 'blue' | 'pastel';
+export type Palette = 'volt' | 'blue' | 'pastel' | 'fire';
 
 const THEME_KEY = 'volt-theme';
 const PALETTE_KEY = 'volt-palette';
-const PALETTES: Palette[] = ['volt', 'blue', 'pastel'];
+const PALETTES: Palette[] = ['volt', 'blue', 'pastel', 'fire'];
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {

@@ -37,6 +37,11 @@ import { Palette, ThemeService } from '../core/theme.service';
                 <path d="M12 3.5 C12 3.5 5.5 11 5.5 15.5 A6.5 6.5 0 0 0 18.5 15.5 C18.5 11 12 3.5 12 3.5 Z" />
               </svg>
             }
+            @case ('fire') {
+              <svg viewBox="0 0 24 24" width="17" height="17">
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.07-1.43-.22-3.08 1-4 .5 1.5 1.5 2 2.5 3 1.5 1.5 2 3 2 4.5a4.5 4.5 0 1 1-9 0c0-1.5.5-2.5 1.5-3.5z" />
+              </svg>
+            }
           }
         </button>
       }
@@ -92,5 +97,6 @@ export class PalettePicker {
     { id: 'volt', name: 'Volt' },
     { id: 'blue', name: 'Azul' },
     { id: 'pastel', name: 'Pastel' },
+    { id: 'fire', name: 'Fuego' },
   ];
 }

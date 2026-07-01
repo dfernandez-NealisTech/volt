@@ -3,6 +3,7 @@ import {
   Component,
   OnDestroy,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -14,7 +15,7 @@ import { MarcajesService } from '../core/marcajes.service';
 import { ToastService } from '../core/toast.service';
 import { SettingsService } from '../core/settings.service';
 import { Sentido } from '../core/config';
-import { formatTime, localDateString } from '../core/date-utils';
+import { formatTime, localDateString, localDateTimeString } from '../core/date-utils';
 import { VoltDatepicker } from './datepicker';
 
 /**
@@ -28,10 +29,25 @@ import { VoltDatepicker } from './datepicker';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, RouterLink, VoltDatepicker],
   template: `
-    <section class="panel ticked qc">
+    <div class="flip" [class.flipped]="manual()">
+     <div class="flip-inner">
+      <!-- ===== FRONT · fichaje rápido ===== -->
+      <section class="panel ticked qc face front" [attr.aria-hidden]="manual()">
       <div class="chrome">
         <span class="label">Fichaje rápido</span>
-        <span class="clock mono">{{ nowTime() }}</span>
+        <button
+          type="button"
+          class="flipbtn"
+          (click)="toggleManual()"
+          title="Cambiar a marcaje manual"
+          aria-label="Cambiar a marcaje manual"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <polyline points="21 4 21 9 16 9" />
+            <polyline points="3 20 3 15 8 15" />
+            <path d="M20 9A8 8 0 0 0 5.6 5.6L3 8M4 15a8 8 0 0 0 14.4 2.4L21 15" />
+          </svg>
+        </button>
       </div>
 
       <div class="cols">
@@ -136,25 +152,221 @@ import { VoltDatepicker } from './datepicker';
           }
         </div>
       </div>
-    </section>
+      </section>
+
+      <!-- ===== BACK · marcaje manual ===== -->
+      <section class="panel ticked qc face back" [attr.aria-hidden]="!manual()">
+        <div class="chrome">
+          <span class="label">Marcaje manual</span>
+          <button
+            type="button"
+            class="flipbtn"
+            (click)="toggleManual()"
+            title="Volver al fichaje rápido"
+            aria-label="Volver al fichaje rápido"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <polyline points="21 4 21 9 16 9" />
+              <polyline points="3 20 3 15 8 15" />
+              <path d="M20 9A8 8 0 0 0 5.6 5.6L3 8M4 15a8 8 0 0 0 14.4 2.4L21 15" />
+            </svg>
+          </button>
+        </div>
+
+        <form class="mform" (ngSubmit)="sendManual()">
+          <div class="grp">
+            <span class="label">Fecha y hora</span>
+            <volt-datepicker [(value)]="fecha" [withTime]="true" placeholder="Selecciona fecha y hora" />
+          </div>
+
+          <div class="actionrow">
+            <div class="toggles">
+              <div class="tgl">
+                <span class="tgico" title="Sentido" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="15" height="15">
+                    <path d="M17 4l3 3-3 3" />
+                    <path d="M20 7H9a4 4 0 0 0-4 4" />
+                    <path d="M7 20l-3-3 3-3" />
+                    <path d="M4 17h11a4 4 0 0 0 4-4" />
+                  </svg>
+                </span>
+                <div class="seg sm" role="group" aria-label="Sentido">
+                  <button type="button" [class.on]="sentido() === 'ENTRADA'" (click)="setSentido('ENTRADA')">Entrada</button>
+                  <button type="button" [class.on]="sentido() === 'SALIDA'" (click)="setSentido('SALIDA')">Salida</button>
+                </div>
+              </div>
+
+              <div class="tgl">
+                <span class="tgico" title="Teletrabajo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="15" height="15">
+                    <path d="M3 11l9-7 9 7" />
+                    <path d="M5 10v9h5v-6h4v6h5v-9" />
+                  </svg>
+                </span>
+                <div class="seg sm" role="group" aria-label="Teletrabajo">
+                  <button type="button" [class.on]="!mtele()" (click)="mtele.set(false)">No</button>
+                  <button type="button" [class.on]="mtele()" (click)="mtele.set(true)">Sí</button>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-volt sendbtn" [disabled]="mBusy()">
+              @if (mBusy()) {
+                <span class="dots"><i></i><i></i><i></i></span><span>Enviando</span>
+              } @else {
+                <span>Enviar marcaje</span>
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+     </div>
+    </div>
   `,
   styles: [
     `
       :host {
         display: block;
       }
+
+      /* ===== flip card ===== */
+      .flip {
+        perspective: 2200px;
+      }
+      .flip-inner {
+        display: grid;
+        transform-style: preserve-3d;
+        transition: transform 0.6s cubic-bezier(0.5, 0.12, 0.2, 1);
+      }
+      .flip.flipped .flip-inner {
+        transform: rotateY(180deg);
+      }
+      .face {
+        grid-area: 1 / 1;
+        min-width: 0;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        /* Panels can be translucent (pastel/glass theme), where backdrop-filter
+           defeats backface-visibility and the reverse face bleeds through.
+           So we also snap opacity at the rotation midpoint — the card is
+           edge-on there, so only one face is ever painted (invisible hand-off). */
+        transition: opacity 0.3s step-end;
+      }
+      .face.back {
+        transform: rotateY(180deg);
+        display: flex;
+        flex-direction: column;
+      }
+      /* the face turned away is fully hidden and not clickable/focusable */
+      .face[aria-hidden='true'] {
+        opacity: 0;
+        pointer-events: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .flip-inner,
+        .face {
+          transition: none;
+        }
+      }
+
       .qc {
+        position: relative;
         padding: 1.3rem 1.4rem 1.5rem;
+      }
+
+      /* ===== flip toggle (top-right, in the header) ===== */
+      .flipbtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 1.9rem;
+        height: 1.9rem;
+        margin: -0.3rem 0;
+        padding: 0;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        background: var(--bg);
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .flipbtn:hover {
+        color: var(--volt-ink);
+        border-color: var(--volt);
+        background: color-mix(in srgb, var(--volt) 8%, transparent);
+        box-shadow: 0 0 16px -4px var(--volt-glow);
+      }
+      .flipbtn svg {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: transform 0.5s cubic-bezier(0.5, 0.12, 0.2, 1);
+      }
+      .flipbtn:hover svg {
+        transform: rotate(-180deg);
+      }
+
+      /* ===== back face · manual marcaje (ultra-compact) ===== */
+      .mform {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .grp {
+        display: block;
+      }
+      .grp > .label {
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+      /* toggles (left) + send button (right) share one row to save height */
+      .actionrow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem 1.4rem;
+        flex-wrap: wrap;
+        margin-top: 1.2rem;
+      }
+      .toggles {
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        flex-wrap: wrap;
+      }
+      .tgl {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-width: 0;
+      }
+      .tgico {
+        display: inline-flex;
+        flex-shrink: 0;
+        color: var(--text-faint);
+      }
+      .tgico svg {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .sendbtn {
+        flex: 1;
+        min-width: 12rem;
+        max-width: 20rem;
       }
       .chrome {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 1.2rem;
-      }
-      .clock {
-        font-size: 0.8rem;
-        color: var(--text-dim);
       }
       .cols {
         display: grid;
@@ -425,6 +637,26 @@ export class QuickClock implements OnDestroy {
   protected forgotBusy = signal(false);
   protected progress = signal('Enviando');
 
+  /** Flip state: false => quick clock-in face, true => manual marcaje face. */
+  protected manual = computed(() => this.settings.prefs().quickManualMode);
+
+  // ---- manual marcaje (back face) form state ----
+  protected fecha = localDateTimeString();
+  protected sentido = signal<Sentido>('ENTRADA');
+  protected mtele = signal(false);
+  protected mBusy = signal(false);
+  /** True once the user hand-picks a sentido, so we stop auto-prefilling it. */
+  private sentidoTouched = false;
+
+  constructor() {
+    // Default the manual sentido to whatever "fichar ahora" would post next,
+    // until the user overrides it.
+    effect(() => {
+      const w = this.working();
+      if (!this.sentidoTouched) this.sentido.set(w ? 'SALIDA' : 'ENTRADA');
+    });
+  }
+
   private nowTick = signal(Date.now());
   private timer = setInterval(() => this.nowTick.set(Date.now()), 15_000);
   protected nowTime = computed(() => formatTime(new Date(this.nowTick())));
@@ -550,6 +782,34 @@ export class QuickClock implements OnDestroy {
       this.toasts.error((err as Error).message);
     } finally {
       this.forgotBusy.set(false);
+    }
+  }
+
+  protected toggleManual() {
+    this.settings.setPref('quickManualMode', !this.manual());
+  }
+
+  protected setSentido(s: Sentido) {
+    this.sentidoTouched = true;
+    this.sentido.set(s);
+  }
+
+  /** Post a single manual marcaje at the chosen date/time (back face). */
+  protected async sendManual() {
+    if (this.mBusy()) return;
+    if (!this.fecha) {
+      this.toasts.error('Selecciona fecha y hora');
+      return;
+    }
+    this.mBusy.set(true);
+    try {
+      await this.api.postFromLocalString(this.fecha, this.sentido(), this.mtele());
+      this.toasts.success(`Marcaje ${this.sentido().toLowerCase()} enviado`);
+      this.changed.emit();
+    } catch (err) {
+      this.toasts.error((err as Error).message);
+    } finally {
+      this.mBusy.set(false);
     }
   }
 

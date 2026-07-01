@@ -152,6 +152,57 @@
 }
 
 /* ============================================================
+   PALETTE · FIRE  (orange, flames)
+   ============================================================ */
+[data-palette='fire'][data-theme='dark'] {
+  --bg: #0e0a07;
+  --bg-2: #16110c;
+  --bg-3: #1d1610;
+  --line: rgba(255, 180, 120, 0.09);
+  --line-strong: rgba(255, 180, 120, 0.18);
+  --text: #f1e8e0;
+  --text-dim: #a8978a;
+  --text-faint: #6c5d51;
+
+  --volt: #ff7d2b; /* flame orange */
+  --volt-ink: #ffa057;
+  --volt-glow: rgba(255, 125, 43, 0.55);
+  --cyan: #ffcf4d; /* ember amber secondary */
+  --danger: #ff4d4d;
+
+  --grid: rgba(255, 180, 120, 0.025);
+  --on-volt: #1a0d05;
+  --scan: rgba(255, 125, 43, 0.05);
+  /* flame glow blobs anchored at the bottom */
+  --flame-core: rgba(255, 120, 30, 0.2);
+  --flame-a: rgba(255, 70, 20, 0.14);
+  --flame-b: rgba(255, 165, 45, 0.12);
+}
+[data-palette='fire'][data-theme='light'] {
+  --bg: #fff6ef;
+  --bg-2: #ffffff;
+  --bg-3: #ffffff;
+  --line: rgba(120, 55, 15, 0.1);
+  --line-strong: rgba(120, 55, 15, 0.2);
+  --text: #2a1a0e;
+  --text-dim: #7a5f4c;
+  --text-faint: #b09a88;
+
+  --volt: #ed5c0c; /* deep flame orange */
+  --volt-ink: #c4470a;
+  --volt-glow: rgba(237, 92, 12, 0.42);
+  --cyan: #e08a00; /* amber */
+  --danger: #e23d2d;
+
+  --grid: rgba(120, 55, 15, 0.03);
+  --on-volt: #ffffff;
+  --scan: rgba(237, 92, 12, 0.06);
+  --flame-core: rgba(255, 120, 30, 0.22);
+  --flame-a: rgba(255, 90, 25, 0.16);
+  --flame-b: rgba(255, 175, 60, 0.14);
+}
+
+/* ============================================================
    Base
    ============================================================ */
 * {
@@ -238,6 +289,81 @@ body::after {
   opacity: 0.04;
 }
 
+/* ---- FIRE · flames rising from the bottom (gentle flicker) ---- */
+[data-palette='fire'] body::before {
+  background-image:
+    radial-gradient(58% 40% at 50% 109%, var(--flame-core), transparent 70%),
+    radial-gradient(40% 34% at 16% 113%, var(--flame-a), transparent 68%),
+    radial-gradient(42% 36% at 84% 111%, var(--flame-b), transparent 68%);
+  background-size: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+  transform-origin: bottom center;
+  animation: fire-flicker 4.5s ease-in-out infinite;
+}
+[data-palette='fire'] body::after {
+  background: radial-gradient(70% 45% at 50% 112%, var(--volt-glow), transparent 60%);
+  opacity: 0.16;
+}
+@keyframes fire-flicker {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  35% { opacity: 0.86; transform: scaleY(1.05); }
+  60% { opacity: 0.95; transform: scaleY(0.98); }
+}
+/* warm ember glow around fire cards */
+[data-palette='fire'] .panel {
+  box-shadow: 0 0 30px -16px var(--volt-glow);
+}
+/* fire corner detail: smouldering "red-hot" glow blooming from the 4 corners */
+[data-palette='fire'] .ticked {
+  isolation: isolate;
+}
+[data-palette='fire'] .ticked::before {
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: none;
+  opacity: 0.55;
+  z-index: -1;
+  border-radius: inherit;
+  /* ember "corner brackets": thin flame-coloured L-strokes that feather
+     inward from each corner — subtler and more distinctive than radial blobs */
+  background:
+    /* top-left */
+    linear-gradient(to right, var(--volt-ink), transparent) 0 0 / 30px 1.5px no-repeat,
+    linear-gradient(to bottom, var(--volt-ink), transparent) 0 0 / 1.5px 30px no-repeat,
+    /* top-right */
+    linear-gradient(to left, var(--cyan), transparent) 100% 0 / 30px 1.5px no-repeat,
+    linear-gradient(to bottom, var(--cyan), transparent) 100% 0 / 1.5px 30px no-repeat,
+    /* bottom-right */
+    linear-gradient(to left, var(--volt-ink), transparent) 100% 100% / 30px 1.5px no-repeat,
+    linear-gradient(to top, var(--volt-ink), transparent) 100% 100% / 1.5px 30px no-repeat,
+    /* bottom-left */
+    linear-gradient(to right, var(--cyan), transparent) 0 100% / 30px 1.5px no-repeat,
+    linear-gradient(to top, var(--cyan), transparent) 0 100% / 1.5px 30px no-repeat;
+  animation: fire-corner-flicker 5s ease-in-out infinite;
+}
+/* faint diagonal heat-haze bleeding from opposite corners */
+[data-palette='fire'] .ticked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: none;
+  z-index: -1;
+  opacity: 0.4;
+  border-radius: inherit;
+  background:
+    radial-gradient(120px 60px at 0% 0%, var(--flame-core), transparent 70%),
+    radial-gradient(120px 60px at 100% 100%, var(--flame-b), transparent 70%);
+}
+@keyframes fire-corner-flicker {
+  0%, 100% { opacity: 0.55; }
+  40% { opacity: 0.4; }
+  70% { opacity: 0.62; }
+}
+
 /* ---- PASTEL · glassmorphism cards ---- */
 [data-palette='pastel'] .panel {
   background: color-mix(in srgb, var(--bg-2) 56%, transparent);
@@ -257,6 +383,10 @@ body::after {
 [data-palette='pastel'] {
   --font-sans: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+[data-palette='fire'] {
+  --font-sans: 'Oswald', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Spline Sans Mono', ui-monospace, 'SFMono-Regular', monospace;
 }
 
 ::selection {

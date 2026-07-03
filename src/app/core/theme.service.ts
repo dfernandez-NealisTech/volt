@@ -1,11 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 
 export type Theme = 'dark' | 'light';
-export type Palette = 'volt' | 'blue' | 'pastel' | 'fire';
+export type Palette = 'volt' | 'blue' | 'pastel' | 'fire' | 'dream';
 
 const THEME_KEY = 'volt-theme';
 const PALETTE_KEY = 'volt-palette';
-const PALETTES: Palette[] = ['volt', 'blue', 'pastel', 'fire'];
+const PALETTES: Palette[] = ['volt', 'blue', 'pastel', 'fire', 'dream'];
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -72,7 +72,7 @@ export class ThemeService {
     }, event);
   }
 
-  /** Switch colour palette (volt / blue / pastel). */
+  /** Switch colour palette (volt / blue / pastel / fire / dream). */
   setPalette(p: Palette, event?: MouseEvent) {
     if (p === this.palette()) return;
     this.surge(() => {

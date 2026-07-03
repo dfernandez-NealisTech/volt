@@ -205,6 +205,67 @@
 }
 
 /* ============================================================
+   PALETTE · DREAM  (oneiric — purple/lavender, drifting aurora, glass)
+   ============================================================ */
+[data-palette='dream'][data-theme='dark'] {
+  --bg: #140f21;
+  --bg-2: #1b1430;
+  --bg-3: #241b3d;
+  --line: rgba(214, 196, 255, 0.09);
+  --line-strong: rgba(214, 196, 255, 0.18);
+  --text: #ece3f7;
+  --text-dim: #a99cc4;
+  --text-faint: #6d6386;
+
+  --volt: #b57edc; /* lavender-magenta signature */
+  --volt-ink: #cba3ec; /* readable lavender on deep purple */
+  --volt-glow: rgba(181, 126, 220, 0.55);
+  --cyan: #8fa6ff; /* periwinkle — the aurora's cool edge */
+  --danger: #ff86a8;
+
+  --grid: rgba(214, 196, 255, 0.02);
+  --on-volt: #1a1030;
+  --scan: rgba(181, 126, 220, 0.05);
+  --radius: 16px;
+  /* slow-drifting aurora veils */
+  --aurora-a: rgba(181, 126, 220, 0.2); /* magenta-violet */
+  --aurora-b: rgba(120, 108, 230, 0.16); /* deep periwinkle */
+  --aurora-c: rgba(216, 180, 254, 0.12); /* pale lilac halo */
+  /* star field — bright on the deep night sky */
+  --star-a: rgba(240, 232, 250, 1); /* pale lavender white */
+  --star-b: rgba(216, 180, 254, 0.98); /* lilac */
+  --star-c: rgba(180, 200, 255, 0.95); /* periwinkle */
+}
+[data-palette='dream'][data-theme='light'] {
+  --bg: #f6f1fb;
+  --bg-2: #ffffff;
+  --bg-3: #ffffff;
+  --line: rgba(60, 35, 90, 0.1);
+  --line-strong: rgba(60, 35, 90, 0.2);
+  --text: #251b33;
+  --text-dim: #6d6280;
+  --text-faint: #a99cbb;
+
+  --volt: #a06fd0;
+  --volt-ink: #7d43b8; /* readable violet on white */
+  --volt-glow: rgba(160, 111, 208, 0.42);
+  --cyan: #6f7fe0;
+  --danger: #e0587f;
+
+  --grid: rgba(60, 35, 90, 0.03);
+  --on-volt: #ffffff;
+  --scan: rgba(160, 111, 208, 0.06);
+  --radius: 16px;
+  --aurora-a: rgba(160, 111, 208, 0.16);
+  --aurora-b: rgba(120, 108, 230, 0.12);
+  --aurora-c: rgba(200, 170, 250, 0.14);
+  /* star field — bold purple specks that pop over the pale lavender day sky */
+  --star-a: rgba(58, 26, 104, 1); /* deep indigo-violet */
+  --star-b: rgba(82, 38, 140, 1); /* dark violet */
+  --star-c: rgba(48, 40, 150, 1); /* deep periwinkle-violet */
+}
+
+/* ============================================================
    Base
    ============================================================ */
 * {
@@ -366,6 +427,101 @@ body::after {
   70% { opacity: 0.62; }
 }
 
+/* ---- DREAM · slow-drifting aurora veils + softly breathing bloom ---- */
+[data-palette='dream'] body::before {
+  background-image:
+    radial-gradient(55% 48% at 22% 28%, var(--aurora-a), transparent 70%),
+    radial-gradient(52% 46% at 82% 64%, var(--aurora-b), transparent 72%),
+    radial-gradient(48% 44% at 58% 10%, var(--aurora-c), transparent 74%);
+  background-size: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+  filter: blur(6px);
+  transform-origin: center;
+  animation: dream-drift 26s ease-in-out infinite;
+}
+[data-palette='dream'] body::after {
+  background: radial-gradient(70% 60% at 50% 38%, var(--volt-glow), transparent 62%);
+  opacity: 0.1;
+  animation: dream-breathe 12s ease-in-out infinite;
+}
+@keyframes dream-drift {
+  0%, 100% { transform: translate3d(-2%, -1%, 0) scale(1.06); }
+  33% { transform: translate3d(3%, 2%, 0) scale(1.12); }
+  66% { transform: translate3d(1%, -2%, 0) scale(1.08); }
+}
+@keyframes dream-breathe {
+  0%, 100% { opacity: 0.07; }
+  50% { opacity: 0.16; }
+}
+
+/* ---- DREAM · twinkling star field (own layer on <html>, behind the aurora;
+   colours come from --star-* so it themes for dark & light) ---- */
+[data-palette='dream']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2.4px 2.4px at 18% 24%, var(--star-a), transparent 62%),
+    radial-gradient(2px 2px at 68% 12%, var(--star-b), transparent 62%),
+    radial-gradient(1.8px 1.8px at 42% 62%, var(--star-a), transparent 62%),
+    radial-gradient(2.5px 2.5px at 88% 46%, var(--star-c), transparent 62%),
+    radial-gradient(1.8px 1.8px at 8% 80%, var(--star-a), transparent 62%),
+    radial-gradient(2px 2px at 58% 90%, var(--star-b), transparent 62%);
+  background-size:
+    210px 210px, 265px 265px, 165px 165px, 300px 300px, 195px 195px, 250px 250px;
+  background-repeat: repeat;
+  animation: dream-twinkle 6.5s ease-in-out infinite, dream-stars 150s linear infinite;
+}
+/* light mode: pack the stars a bit denser so they read on the pale sky */
+[data-palette='dream'][data-theme='light']::before {
+  background-size:
+    155px 155px, 195px 195px, 122px 122px, 220px 220px, 145px 145px, 185px 185px;
+}
+@keyframes dream-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.72; }
+}
+@keyframes dream-stars {
+  from {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 60px 120px, -80px 100px, 40px 140px, -60px 90px, 90px 130px, -40px 110px;
+  }
+}
+
+/* dreamy glass cards: soft lavender halo + a live aurora shimmer
+   sweeping the top edge */
+[data-palette='dream'] .panel {
+  background-color: color-mix(in srgb, var(--bg-2) 60%, transparent);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--volt) 28%,
+    var(--cyan) 50%,
+    var(--volt) 72%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 60% 1.5px;
+  background-position: -150% 0;
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  backdrop-filter: blur(18px) saturate(1.25);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
+    0 12px 40px -20px var(--volt-glow);
+  animation: dream-shimmer 7s linear infinite;
+}
+@keyframes dream-shimmer {
+  /* both endpoints keep the 60%-wide band fully off-screen (‑150% = just past
+     the left edge, 250% = just past the right edge) so the loop restart is
+     invisible; the hold from 60%→100% is a rest between sweeps */
+  0% { background-position: -150% 0; }
+  60%, 100% { background-position: 250% 0; }
+}
+
 /* ---- PASTEL · glassmorphism cards ---- */
 [data-palette='pastel'] .panel {
   background: color-mix(in srgb, var(--bg-2) 56%, transparent);
@@ -389,6 +545,10 @@ body::after {
 [data-palette='fire'] {
   --font-sans: 'Oswald', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Spline Sans Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+[data-palette='dream'] {
+  --font-sans: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', monospace;
 }
 
 ::selection {
@@ -427,7 +587,9 @@ body::after {
 
   /* corner ticks — instrument-panel flavor (hidden when rounded) */
   [data-palette='pastel'] .ticked::before,
-  [data-palette='pastel'] .ticked::after {
+  [data-palette='pastel'] .ticked::after,
+  [data-palette='dream'] .ticked::before,
+  [data-palette='dream'] .ticked::after {
     display: none;
   }
   .ticked::before,

@@ -266,6 +266,23 @@ import {
         );
         box-shadow: 0 0 12px -1px var(--volt-glow);
       }
+
+      /* ---- DREAM theme: bars drift like a soft aurora ---- */
+      :host-context([data-palette='dream']) .bar {
+        background: linear-gradient(
+          90deg,
+          var(--volt) 0%,
+          var(--cyan) 100%
+        );
+        box-shadow: 0 0 14px -3px var(--volt-glow);
+      }
+      :host-context([data-palette='dream']) .bar.open {
+        background: repeating-linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--volt) 70%, transparent) 0 6px,
+          transparent 6px 13px
+        );
+      }
     `,
   ],
 })

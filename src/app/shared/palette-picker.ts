@@ -3,8 +3,9 @@ import { Palette, ThemeService } from '../core/theme.service';
 
 /**
  * Palette selector as a row of per-theme icons (volt = bolt, blue = grid,
- * pastel = droplet). Only the active icon is coloured; hovering a non-active
- * one tints it with a variation of the current primary.
+ * pastel = droplet, fire = flame, dream = crescent moon). Only the active icon
+ * is coloured; hovering a non-active one tints it with a variation of the
+ * current primary.
  */
 @Component({
   selector: 'palette-picker',
@@ -40,6 +41,12 @@ import { Palette, ThemeService } from '../core/theme.service';
             @case ('fire') {
               <svg viewBox="0 0 24 24" width="17" height="17">
                 <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.07-1.43-.22-3.08 1-4 .5 1.5 1.5 2 2.5 3 1.5 1.5 2 3 2 4.5a4.5 4.5 0 1 1-9 0c0-1.5.5-2.5 1.5-3.5z" />
+              </svg>
+            }
+            @case ('dream') {
+              <svg viewBox="0 0 24 24" width="17" height="17">
+                <path d="M12.5 3.5a6.2 6.2 0 0 0 8 8 7.6 7.6 0 1 1-8-8z" />
+                <path d="M18.5 3.2l.75 1.85 1.85.75-1.85.75-.75 1.85-.75-1.85-1.85-.75 1.85-.75z" />
               </svg>
             }
           }
@@ -98,5 +105,6 @@ export class PalettePicker {
     { id: 'blue', name: 'Azul' },
     { id: 'pastel', name: 'Pastel' },
     { id: 'fire', name: 'Fuego' },
+    { id: 'dream', name: 'Onírico' },
   ];
 }

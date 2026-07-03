@@ -296,7 +296,7 @@ export class Shell {
 
   protected nav = [
     { path: '/dashboard', label: 'Semana', idx: '01' },
-    { path: '/fichar', label: 'Fichar', idx: '02' },
+    { path: '/fichar', label: 'Bulk', idx: '02' },
     { path: '/ajustes', label: 'Ajustes', idx: '03' },
   ];
 

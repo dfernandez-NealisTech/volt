@@ -18,10 +18,10 @@ export class MarcajesService {
   private auth = inject(AuthService);
   private settings = inject(SettingsService);
 
-  /** Recent marcajes (newest first). */
-  async fetchAll(): Promise<Marcaje[]> {
+  /** Recent marcajes (newest first). `size` widens the window when needed. */
+  async fetchAll(size = 50): Promise<Marcaje[]> {
     return firstValueFrom(
-      this.http.get<Marcaje[]>(`${API.marcajes}?page=0&size=50&sort=fecha,desc`, {
+      this.http.get<Marcaje[]>(`${API.marcajes}?page=0&size=${size}&sort=fecha,desc`, {
         headers: this.auth.authHeaders(),
       }),
     ).catch(() => {

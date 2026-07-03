@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MarcajesService } from '../../core/marcajes.service';
 import { ToastService } from '../../core/toast.service';
 import { Marcaje } from '../../core/models';
-import { formatDuration, formatTime, weekRangeLabel } from '../../core/date-utils';
+import { formatDuration, formatTime, localDateString, weekRangeLabel } from '../../core/date-utils';
 import { buildWeekModel } from '../../core/week-data';
 import { VoltTimeline } from '../../shared/timeline-chart';
 import { QuickClock } from '../../shared/quick-clock';
@@ -69,7 +69,7 @@ import { QuickClock } from '../../shared/quick-clock';
 
     <!-- quick clock-in -->
     <div class="quick rise" style="animation-delay:.3s">
-      <volt-quick-clock [working]="working()" (changed)="load()" />
+      <volt-quick-clock [working]="working()" [markedDays]="markedDays()" (changed)="load()" />
     </div>
   `,
   styles: [
@@ -245,6 +245,13 @@ export class DashboardPage {
   protected avgMs = computed(() => {
     const n = this.daysWorked();
     return n > 0 ? this.week().weekTotalMs / n : 0;
+  });
+
+  /** Local date keys that already have at least one marcaje (for warnings). */
+  protected markedDays = computed(() => {
+    const set = new Set<string>();
+    for (const m of this.marcajes()) set.add(localDateString(new Date(m.fecha)));
+    return set;
   });
 
   protected working = computed(() => this.marcajes()[0]?.sentido === 'ENTRADA');

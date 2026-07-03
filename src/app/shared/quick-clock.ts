@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnDestroy,
   computed,
   effect,
@@ -8,6 +9,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -17,6 +19,13 @@ import { SettingsService } from '../core/settings.service';
 import { Sentido } from '../core/config';
 import { formatTime, localDateString, localDateTimeString } from '../core/date-utils';
 import { VoltDatepicker } from './datepicker';
+
+/** A pending action awaiting confirmation in the warning dialog. */
+interface Confirm {
+  title: string;
+  body: string;
+  action: () => void;
+}
 
 /**
  * Quick clock-in panel for the dashboard. The primary action posts a marcaje
@@ -222,6 +231,36 @@ import { VoltDatepicker } from './datepicker';
       </section>
      </div>
     </div>
+
+    <!-- ===== confirm dialog (future date / day already clocked) =====
+         Native <dialog> so it renders in the browser top layer, escaping the
+         card's transform/perspective containing block and covering the viewport. -->
+    <dialog
+      #cfDlg
+      class="cf-dialog"
+      role="alertdialog"
+      aria-labelledby="cf-title"
+      (click)="onBackdropClick($event, cfDlg)"
+      (close)="closeConfirm()"
+    >
+      @if (confirm(); as c) {
+        <div class="cf" (click)="$event.stopPropagation()">
+          <span class="cf-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path d="M12 3.5 1.8 21h20.4L12 3.5Z" />
+              <path d="M12 10v4.5" />
+              <circle cx="12" cy="17.6" r="0.6" fill="currentColor" stroke="none" />
+            </svg>
+          </span>
+          <h3 class="cf-title" id="cf-title">{{ c.title }}</h3>
+          <p class="cf-body">{{ c.body }}</p>
+          <div class="cf-actions">
+            <button type="button" class="btn" (click)="closeConfirm()">Cancelar</button>
+            <button type="button" class="btn btn-volt" (click)="runConfirm()">Continuar</button>
+          </div>
+        </div>
+      }
+    </dialog>
   `,
   styles: [
     `
@@ -617,12 +656,102 @@ import { VoltDatepicker } from './datepicker';
           height: 1px;
         }
       }
+
+      /* ===== confirm dialog (native <dialog>, top layer) ===== */
+      .cf-dialog {
+        position: fixed;
+        inset: 0;
+        margin: auto;
+        width: calc(100% - 3rem);
+        max-width: 24rem;
+        height: fit-content;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        overflow: visible;
+      }
+      .cf-dialog::backdrop {
+        background: color-mix(in srgb, #000 55%, transparent);
+        backdrop-filter: blur(2px);
+        animation: cf-fade 0.18s ease;
+      }
+      .cf {
+        position: relative;
+        width: 100%;
+        padding: 1.5rem 1.5rem 1.3rem;
+        background: var(--bg-3);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--line);
+        animation: cf-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .cf::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        width: 12px;
+        height: 12px;
+        border-top: 1px solid var(--cyan);
+        border-left: 1px solid var(--cyan);
+      }
+      .cf-ico {
+        display: inline-flex;
+        color: var(--cyan);
+        margin-bottom: 0.7rem;
+      }
+      .cf-ico svg {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.7;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .cf-title {
+        font-size: 1.02rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+      }
+      .cf-body {
+        margin: 0 0 1.3rem;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        color: var(--text-dim);
+      }
+      .cf-body b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .cf-actions {
+        display: flex;
+        gap: 0.6rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+      @keyframes cf-fade {
+        from { opacity: 0; }
+      }
+      @keyframes cf-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.97);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .cf-backdrop,
+        .cf {
+          animation: none;
+        }
+      }
     `,
   ],
 })
 export class QuickClock implements OnDestroy {
   /** Current status from the dashboard: true => clocked in (next = salida). */
   readonly working = input(false);
+  /** Local date keys ("YYYY-MM-DD") that already have marcajes, for warnings. */
+  readonly markedDays = input<Set<string>>(new Set());
   /** Emitted after a successful post so the parent reloads the week. */
   readonly changed = output<void>();
 
@@ -636,6 +765,9 @@ export class QuickClock implements OnDestroy {
   protected dayBusy = signal(false);
   protected forgotBusy = signal(false);
   protected progress = signal('Enviando');
+  /** Pending confirmation (future date / day already clocked), or null. */
+  protected confirm = signal<Confirm | null>(null);
+  private cfDlg = viewChild<ElementRef<HTMLDialogElement>>('cfDlg');
 
   /** Flip state: false => quick clock-in face, true => manual marcaje face. */
   protected manual = computed(() => this.settings.prefs().quickManualMode);
@@ -654,6 +786,15 @@ export class QuickClock implements OnDestroy {
     effect(() => {
       const w = this.working();
       if (!this.sentidoTouched) this.sentido.set(w ? 'SALIDA' : 'ENTRADA');
+    });
+
+    // Drive the native <dialog> from the confirm() signal.
+    effect(() => {
+      const dlg = this.cfDlg()?.nativeElement;
+      if (!dlg) return;
+      const open = !!this.confirm();
+      if (open && !dlg.open) dlg.showModal();
+      else if (!open && dlg.open) dlg.close();
     });
   }
 
@@ -725,12 +866,87 @@ export class QuickClock implements OnDestroy {
     }
   }
 
-  protected async ficharDia() {
+  /** Human-readable label of the picked day, for the confirmation dialog.
+   *  A plain method (not computed) because `dia` is a template field, not a signal. */
+  protected diaLabel(): string {
+    const v = this.dia;
+    if (!v) return '';
+    const [y, m, d] = v.split('-').map(Number);
+    if (!y) return v;
+    const s = new Date(y, m - 1, d).toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+    });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  /** Whether "YYYY-MM-DD" is a day after today (day-level, ignoring time). */
+  private isFutureDay(dateStr: string): boolean {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (!y) return false;
+    const day = new Date(y, m - 1, d).getTime();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return day > today.getTime();
+  }
+
+  /** Human-readable label of the manual date+time, for the dialog. */
+  private fechaLabel(): string {
+    const v = this.fecha;
+    if (!v) return '';
+    const s = new Date(v).toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+    });
+    const t = v.split('T')[1]?.slice(0, 5) ?? '';
+    return `${s.charAt(0).toUpperCase() + s.slice(1)}${t ? ' · ' + t : ''}`;
+  }
+
+  private ask(title: string, body: string, action: () => void) {
+    this.confirm.set({ title, body, action });
+  }
+  protected closeConfirm() {
+    this.confirm.set(null);
+  }
+  protected runConfirm() {
+    const c = this.confirm();
+    this.confirm.set(null);
+    c?.action();
+  }
+  /** Close when the click lands on the backdrop (the dialog element itself). */
+  protected onBackdropClick(e: MouseEvent, dlg: HTMLDialogElement) {
+    if (e.target === dlg) this.closeConfirm();
+  }
+
+  protected ficharDia() {
     if (this.dayBusy() || !this.scheduleKey()) return;
     if (!this.dia) {
       this.toasts.error('Selecciona un día');
       return;
     }
+    // Future day takes precedence; otherwise warn if the day is already clocked.
+    if (this.isFutureDay(this.dia)) {
+      this.ask(
+        'Vas a fichar un día futuro',
+        `${this.diaLabel()} aún no ha ocurrido. Se registrarán marcajes con fecha futura. ¿Fichar de todos modos?`,
+        () => this.doFicharDia(),
+      );
+      return;
+    }
+    if (this.markedDays().has(this.dia)) {
+      this.ask(
+        'Este día ya tiene marcajes',
+        `${this.diaLabel()} ya contiene marcajes. Fichar el día completo añadirá más marcajes y podría duplicar la jornada. ¿Continuar de todos modos?`,
+        () => this.doFicharDia(),
+      );
+      return;
+    }
+    void this.doFicharDia();
+  }
+
+  private async doFicharDia() {
     let list;
     try {
       list = this.api.buildDay(this.dia, this.scheduleKey());
@@ -794,13 +1010,25 @@ export class QuickClock implements OnDestroy {
     this.sentido.set(s);
   }
 
-  /** Post a single manual marcaje at the chosen date/time (back face). */
-  protected async sendManual() {
+  /** Validate + warn about future timestamps before posting the manual marcaje. */
+  protected sendManual() {
     if (this.mBusy()) return;
     if (!this.fecha) {
       this.toasts.error('Selecciona fecha y hora');
       return;
     }
+    if (new Date(this.fecha).getTime() > Date.now()) {
+      this.ask(
+        'Vas a fichar en el futuro',
+        `El marcaje (${this.fechaLabel()}) es posterior a ahora. ¿Enviar de todos modos?`,
+        () => this.doSendManual(),
+      );
+      return;
+    }
+    void this.doSendManual();
+  }
+
+  private async doSendManual() {
     this.mBusy.set(true);
     try {
       await this.api.postFromLocalString(this.fecha, this.sentido(), this.mtele());

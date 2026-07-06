@@ -68,6 +68,9 @@ pnpm-lock.yaml
 *.swo
 *~
 
+# Local analytics dashboard (Metabase) — not for the public repo
+/dashboard
+
 # System files
 .DS_Store
 Thumbs.db

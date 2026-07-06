@@ -31,6 +31,7 @@ export class AnalyticsService {
   private queue: EventRow[] = [];
   private started = false;
   private snapshotSources: Array<() => Record<string, unknown>> = [];
+  private lastSnapshotAt = 0;
 
   /** Wire router pageviews, click autocapture and flush timers. Idempotent. */
   init(): void {
@@ -57,9 +58,9 @@ export class AnalyticsService {
 
     setInterval(() => this.flush(), ANALYTICS.flushIntervalMs);
     document.addEventListener('visibilitychange', () => {
-      // Record the active⇄idle transition immediately (reliable even when the
-      // periodic timer is throttled in a hidden tab), then persist it.
-      this.snapshot();
+      // Record the active⇄idle transition, but throttle it so rapid tab
+      // toggling doesn't produce a burst of near-duplicate snapshots.
+      if (Date.now() - this.lastSnapshotAt >= ANALYTICS.snapshotMinGapMs) this.snapshot();
       if (document.visibilityState === 'hidden') this.flush(true);
     });
     window.addEventListener('pagehide', () => this.flush(true));
@@ -91,6 +92,7 @@ export class AnalyticsService {
 
   /** Emit one general snapshot of anonymous user state. */
   private snapshot(): void {
+    this.lastSnapshotAt = Date.now();
     const extra: Record<string, unknown> = {};
     for (const source of this.snapshotSources) {
       try {

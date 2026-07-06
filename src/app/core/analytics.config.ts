@@ -26,6 +26,12 @@ export const ANALYTICS = {
    * anon_id with active=true per time bucket. Default: every 15 minutes.
    */
   snapshotIntervalMs: 15 * 60 * 1000,
+  /**
+   * Minimum gap (ms) between visibility-triggered snapshots, so rapid tab
+   * toggling collapses into one instead of a burst of near-duplicates. The
+   * periodic tick and the initial snapshot ignore this. Default: 30 s.
+   */
+  snapshotMinGapMs: 30 * 1000,
 } as const;
 
 /** Tracking only runs once a project URL and anon key are configured. */

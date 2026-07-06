@@ -45,6 +45,7 @@ interface Confirm {
       <div class="chrome">
         <span class="label">Fichaje rápido</span>
         <button
+          id="quick-clock-flip-to-manual"
           type="button"
           class="flipbtn"
           (click)="toggleManual()"
@@ -64,6 +65,7 @@ interface Confirm {
         <div class="col now">
           <div class="actions">
             <button
+              id="quick-clock-now"
               type="button"
               class="nowbtn"
               [class.salida]="working()"
@@ -90,6 +92,7 @@ interface Confirm {
 
             @if (forgotTarget(); as t) {
               <button
+                id="quick-clock-forgot"
                 type="button"
                 class="forgotbtn"
                 [disabled]="forgotBusy()"
@@ -115,8 +118,8 @@ interface Confirm {
           <div class="teletog">
             <span class="label">Teletrabajo</span>
             <div class="seg sm">
-              <button type="button" [class.on]="!tele()" (click)="setTele(false)">No</button>
-              <button type="button" [class.on]="tele()" (click)="setTele(true)">Sí</button>
+              <button id="quick-clock-tele-no" type="button" [class.on]="!tele()" (click)="setTele(false)">No</button>
+              <button id="quick-clock-tele-si" type="button" [class.on]="tele()" (click)="setTele(true)">Sí</button>
             </div>
           </div>
         </div>
@@ -129,7 +132,7 @@ interface Confirm {
 
           @if (schedules().length === 0) {
             <p class="noned">
-              Sin horarios. <a routerLink="/ajustes">Crear en Ajustes</a>.
+              Sin horarios. <a id="quick-clock-crear-ajustes" routerLink="/ajustes">Crear en Ajustes</a>.
             </p>
           } @else {
             <div class="dayrow">
@@ -147,6 +150,7 @@ interface Confirm {
             </div>
 
             <button
+              id="quick-clock-fichar-dia"
               type="button"
               class="btn w-full"
               [disabled]="dayBusy() || !scheduleKey()"
@@ -168,6 +172,7 @@ interface Confirm {
         <div class="chrome">
           <span class="label">Marcaje manual</span>
           <button
+            id="quick-clock-flip-to-quick"
             type="button"
             class="flipbtn"
             (click)="toggleManual()"
@@ -200,8 +205,8 @@ interface Confirm {
                   </svg>
                 </span>
                 <div class="seg sm" role="group" aria-label="Sentido">
-                  <button type="button" [class.on]="sentido() === 'ENTRADA'" (click)="setSentido('ENTRADA')">Entrada</button>
-                  <button type="button" [class.on]="sentido() === 'SALIDA'" (click)="setSentido('SALIDA')">Salida</button>
+                  <button id="quick-clock-manual-entrada" type="button" [class.on]="sentido() === 'ENTRADA'" (click)="setSentido('ENTRADA')">Entrada</button>
+                  <button id="quick-clock-manual-salida" type="button" [class.on]="sentido() === 'SALIDA'" (click)="setSentido('SALIDA')">Salida</button>
                 </div>
               </div>
 
@@ -213,13 +218,13 @@ interface Confirm {
                   </svg>
                 </span>
                 <div class="seg sm" role="group" aria-label="Teletrabajo">
-                  <button type="button" [class.on]="!mtele()" (click)="mtele.set(false)">No</button>
-                  <button type="button" [class.on]="mtele()" (click)="mtele.set(true)">Sí</button>
+                  <button id="quick-clock-manual-tele-no" type="button" [class.on]="!mtele()" (click)="mtele.set(false)">No</button>
+                  <button id="quick-clock-manual-tele-si" type="button" [class.on]="mtele()" (click)="mtele.set(true)">Sí</button>
                 </div>
               </div>
             </div>
 
-            <button type="submit" class="btn btn-volt sendbtn" [disabled]="mBusy()">
+            <button id="quick-clock-manual-send" type="submit" class="btn btn-volt sendbtn" [disabled]="mBusy()">
               @if (mBusy()) {
                 <span class="dots"><i></i><i></i><i></i></span><span>Enviando</span>
               } @else {
@@ -255,8 +260,8 @@ interface Confirm {
           <h3 class="cf-title" id="cf-title">{{ c.title }}</h3>
           <p class="cf-body">{{ c.body }}</p>
           <div class="cf-actions">
-            <button type="button" class="btn" (click)="closeConfirm()">Cancelar</button>
-            <button type="button" class="btn btn-volt" (click)="runConfirm()">Continuar</button>
+            <button id="quick-clock-confirm-cancel" type="button" class="btn" (click)="closeConfirm()">Cancelar</button>
+            <button id="quick-clock-confirm-continue" type="button" class="btn btn-volt" (click)="runConfirm()">Continuar</button>
           </div>
         </div>
       }

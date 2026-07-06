@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { SettingsService } from '../../core/settings.service';
+import { AnalyticsService } from '../../core/analytics.service';
 import { Horario, RANDOMNESS_BOUNDS, Sentido } from '../../core/config';
 import { totalRange } from '../../core/schedule-math';
 import { formatDuration } from '../../core/date-utils';
@@ -25,7 +26,7 @@ import { RangeSlider } from '../../shared/range-slider';
           <h2>Aleatoriedad</h2>
           <p class="label">Variación de cada tramo de trabajo</p>
         </div>
-        <button class="btn btn-ghost reset" (click)="resetRand()">Restablecer</button>
+        <button id="ajustes-reset-randomness" class="btn btn-ghost reset" (click)="resetRand()">Restablecer</button>
       </div>
       <div class="divider"></div>
 
@@ -67,8 +68,8 @@ import { RangeSlider } from '../../shared/range-slider';
     <section class="sched-head rise" style="animation-delay:.1s">
       <h2>Horarios</h2>
       <div class="actions">
-        <button class="btn btn-ghost reset" (click)="settings.resetSchedules()">Restablecer</button>
-        <button class="btn" (click)="settings.addSchedule()">+ Añadir horario</button>
+        <button id="ajustes-reset-schedules" class="btn btn-ghost reset" (click)="settings.resetSchedules()">Restablecer</button>
+        <button id="ajustes-add-schedule" class="btn" (click)="settings.addSchedule()">+ Añadir horario</button>
       </div>
     </section>
 
@@ -79,10 +80,10 @@ import { RangeSlider } from '../../shared/range-slider';
             <input
               class="field labelfield"
               [value]="h.label"
-              (input)="settings.updateLabel(h.key, asValue($event))"
+              (input)="setLabel(h.key, asValue($event))"
               aria-label="Nombre del horario"
             />
-            <button class="iconbtn danger" (click)="settings.removeSchedule(h.key)" title="Eliminar horario">
+            <button [id]="'ajustes-remove-schedule-' + h.key" class="iconbtn danger" (click)="settings.removeSchedule(h.key)" title="Eliminar horario">
               ✕
             </button>
           </div>
@@ -90,8 +91,8 @@ import { RangeSlider } from '../../shared/range-slider';
           <div class="row tele">
             <span class="label">Teletrabajo</span>
             <div class="seg sm">
-              <button type="button" [class.on]="!h.teletrabajo" (click)="settings.toggleTeletrabajo(h.key, false)">No</button>
-              <button type="button" [class.on]="h.teletrabajo" (click)="settings.toggleTeletrabajo(h.key, true)">Sí</button>
+              <button [id]="'ajustes-tele-no-' + h.key" type="button" [class.on]="!h.teletrabajo" (click)="settings.toggleTeletrabajo(h.key, false)">No</button>
+              <button [id]="'ajustes-tele-si-' + h.key" type="button" [class.on]="h.teletrabajo" (click)="settings.toggleTeletrabajo(h.key, true)">Sí</button>
             </div>
           </div>
 
@@ -100,8 +101,8 @@ import { RangeSlider } from '../../shared/range-slider';
               <div class="mrow">
                 <span class="midx mono">{{ pad(mi + 1) }}</span>
                 <div class="seg sm dir">
-                  <button type="button" [class.on]="m.sentido === 'ENTRADA'" (click)="setSentido(h.key, mi, 'ENTRADA')">Ent</button>
-                  <button type="button" [class.on]="m.sentido === 'SALIDA'" (click)="setSentido(h.key, mi, 'SALIDA')">Sal</button>
+                  <button [id]="'ajustes-marcaje-ent-' + h.key + '-' + mi" type="button" [class.on]="m.sentido === 'ENTRADA'" (click)="setSentido(h.key, mi, 'ENTRADA')">Ent</button>
+                  <button [id]="'ajustes-marcaje-sal-' + h.key + '-' + mi" type="button" [class.on]="m.sentido === 'SALIDA'" (click)="setSentido(h.key, mi, 'SALIDA')">Sal</button>
                 </div>
                 <input
                   class="field timefield"
@@ -110,10 +111,10 @@ import { RangeSlider } from '../../shared/range-slider';
                   (input)="setTime(h.key, mi, asValue($event))"
                   aria-label="Hora"
                 />
-                <button class="iconbtn" (click)="settings.removeMarcaje(h.key, mi)" title="Quitar marcaje">−</button>
+                <button [id]="'ajustes-remove-marcaje-' + h.key + '-' + mi" class="iconbtn" (click)="settings.removeMarcaje(h.key, mi)" title="Quitar marcaje">−</button>
               </div>
             }
-            <button class="addmk" (click)="settings.addMarcaje(h.key)">+ marcaje</button>
+            <button [id]="'ajustes-add-marcaje-' + h.key" class="addmk" (click)="settings.addMarcaje(h.key)">+ marcaje</button>
           </div>
 
           <div class="total" [class.warn]="totals(h).malformed">
@@ -374,7 +375,19 @@ import { RangeSlider } from '../../shared/range-slider';
 })
 export class AjustesPage {
   protected settings = inject(SettingsService);
+  private analytics = inject(AnalyticsService);
   protected bounds = RANDOMNESS_BOUNDS;
+  private debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  /** Coalesce high-frequency edits (drag/keystroke) into one event per pause. */
+  private trackDebounced(bucket: string, name: string, props: Record<string, unknown>, ms = 800) {
+    const prev = this.debounceTimers.get(bucket);
+    if (prev) clearTimeout(prev);
+    this.debounceTimers.set(
+      bucket,
+      setTimeout(() => this.analytics.track(name, props), ms),
+    );
+  }
 
   protected rand = this.settings.randomness;
   protected exampleSegments = computed(() => {
@@ -384,22 +397,36 @@ export class AjustesPage {
 
   protected setLow(v: number) {
     this.settings.setRandomness(v, this.rand().max);
+    this.trackRandomness();
   }
   protected setHigh(v: number) {
     this.settings.setRandomness(this.rand().min, v);
+    this.trackRandomness();
   }
   protected resetRand() {
     this.settings.resetRandomness();
   }
 
+  private trackRandomness() {
+    const { min, max } = this.rand();
+    this.trackDebounced('randomness', 'aleatoriedad_cambiada', { min, max });
+  }
+
+  protected setLabel(key: string, value: string) {
+    this.settings.updateLabel(key, value);
+    this.trackDebounced('label', 'horario_editado', { campo: 'nombre' });
+  }
+
   protected setSentido(key: string, index: number, sentido: Sentido) {
     this.settings.updateMarcaje(key, index, { sentido });
+    this.analytics.track('horario_editado', { campo: 'sentido' });
   }
 
   protected setTime(key: string, index: number, value: string) {
     const [h, m] = value.split(':').map(Number);
     if (Number.isFinite(h) && Number.isFinite(m)) {
       this.settings.updateMarcaje(key, index, { hour: h, minute: m });
+      this.trackDebounced('time', 'horario_editado', { campo: 'hora' });
     }
   }
 

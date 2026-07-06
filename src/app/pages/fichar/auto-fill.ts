@@ -41,12 +41,12 @@ const MONTHS = [
       <div class="divider"></div>
 
       @if (schedules().length === 0) {
-        <p class="noned">No hay horarios. <a routerLink="/ajustes">Crea uno en Ajustes</a>.</p>
+        <p class="noned">No hay horarios. <a id="auto-fill-crear-ajustes" routerLink="/ajustes">Crea uno en Ajustes</a>.</p>
       } @else {
         <div class="monthnav">
-          <button type="button" class="nav" (click)="shiftMonth(-1)" aria-label="Mes anterior">‹</button>
+          <button id="auto-fill-prev-month" type="button" class="nav" (click)="shiftMonth(-1)" aria-label="Mes anterior">‹</button>
           <span class="my">{{ monthLabel() }}</span>
-          <button type="button" class="nav" [disabled]="!canNext()" (click)="shiftMonth(1)" aria-label="Mes siguiente">›</button>
+          <button id="auto-fill-next-month" type="button" class="nav" [disabled]="!canNext()" (click)="shiftMonth(1)" aria-label="Mes siguiente">›</button>
         </div>
 
         <div class="pattern">
@@ -78,6 +78,7 @@ const MONTHS = [
         </p>
 
         <button
+          id="auto-fill-submit"
           type="button"
           class="btn btn-volt fill"
           [disabled]="busy() || targets().length === 0"

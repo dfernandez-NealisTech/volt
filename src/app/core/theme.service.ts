@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { AnalyticsService } from './analytics.service';
 
 export type Theme = 'dark' | 'light';
 export type Palette = 'volt' | 'blue' | 'pastel' | 'fire' | 'dream';
@@ -9,6 +10,8 @@ const PALETTES: Palette[] = ['volt', 'blue', 'pastel', 'fire', 'dream'];
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
+  private readonly analytics = inject(AnalyticsService);
+
   readonly theme = signal<Theme>(this.initialTheme());
   readonly palette = signal<Palette>(this.initialPalette());
 
@@ -70,6 +73,7 @@ export class ThemeService {
       this.persist(THEME_KEY, next);
       this.apply();
     }, event);
+    this.analytics.track('tema_cambiado', { tema: next });
   }
 
   /** Switch colour palette (volt / blue / pastel / fire / dream). */
@@ -80,6 +84,7 @@ export class ThemeService {
       this.persist(PALETTE_KEY, p);
       this.apply();
     }, event);
+    this.analytics.track('paleta_cambiada', { paleta: p });
   }
 
   private persist(key: string, value: string) {

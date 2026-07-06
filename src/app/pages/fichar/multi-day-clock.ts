@@ -58,9 +58,9 @@ const MONTHS = [
         <!-- ===== calendar (left) ===== -->
         <div class="cal">
           <div class="cal-head">
-            <button type="button" class="nav" (click)="shiftMonth(-1)" aria-label="Mes anterior">‹</button>
+            <button id="multi-day-prev-month" type="button" class="nav" (click)="shiftMonth(-1)" aria-label="Mes anterior">‹</button>
             <span class="my">{{ monthLabel() }}</span>
-            <button type="button" class="nav" (click)="shiftMonth(1)" aria-label="Mes siguiente">›</button>
+            <button id="multi-day-next-month" type="button" class="nav" (click)="shiftMonth(1)" aria-label="Mes siguiente">›</button>
           </div>
 
           <div class="dow">
@@ -70,6 +70,7 @@ const MONTHS = [
           <div class="grid" [class.busy]="loading()">
             @for (c of cells(); track c.key) {
               <button
+                [id]="'multi-day-cell-' + c.key"
                 type="button"
                 class="cell"
                 [class.out]="!c.inMonth"
@@ -97,16 +98,17 @@ const MONTHS = [
         <div class="ctrl">
           <div class="grphead">
             <span class="label">Horario</span>
-            <a class="cfg" routerLink="/ajustes">configurar →</a>
+            <a id="multi-day-config-ajustes" class="cfg" routerLink="/ajustes">configurar →</a>
           </div>
 
           @if (schedules().length === 0) {
-            <p class="noned">No hay horarios. <a routerLink="/ajustes">Crea uno en Ajustes</a>.</p>
+            <p class="noned">No hay horarios. <a id="multi-day-crear-ajustes" routerLink="/ajustes">Crea uno en Ajustes</a>.</p>
           }
 
           <div class="schedules">
             @for (h of schedules(); track h.key) {
               <button
+                [id]="'multi-day-sched-' + h.key"
                 type="button"
                 class="sched"
                 [class.on]="selectedKey() === h.key"
@@ -133,11 +135,12 @@ const MONTHS = [
               <span class="cnt">{{ selectedCount() }}</span>
               <span class="label">{{ selectedCount() === 1 ? 'día elegido' : 'días elegidos' }}</span>
               @if (selectedCount() > 0 && !busy()) {
-                <button type="button" class="clearbtn" (click)="clearSelection()">limpiar</button>
+                <button id="multi-day-clear" type="button" class="clearbtn" (click)="clearSelection()">limpiar</button>
               }
             </div>
 
             <button
+              id="multi-day-submit"
               type="button"
               class="btn btn-volt submit"
               [disabled]="busy() || !selectedKey() || selectedCount() === 0"

@@ -3,12 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { API } from './config';
 import { Session } from './models';
+import { AnalyticsService } from './analytics.service';
 
 const SESSION_KEY = 'volt-session';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
+  private analytics = inject(AnalyticsService);
 
   private session = signal<Session | null>(this.loadSession());
   readonly isAuthenticated = computed(() => !!this.session()?.accessToken);
@@ -51,6 +53,7 @@ export class AuthService {
         }),
       );
     } catch {
+      this.analytics.track('login_fallido', { motivo: 'credenciales' });
       throw new Error('Usuario o contraseña incorrectos');
     }
 
@@ -60,12 +63,14 @@ export class AuthService {
     const account = await firstValueFrom(
       this.http.get<{ id: number }>(API.account, { headers }),
     ).catch(() => {
+      this.analytics.track('login_fallido', { motivo: 'cuenta' });
       throw new Error('No se pudo obtener el ID del usuario');
     });
 
     const userDetail = await firstValueFrom(
       this.http.get<{ personalId: number }>(`${API.usuarios}/${account.id}`, { headers }),
     ).catch(() => {
+      this.analytics.track('login_fallido', { motivo: 'personal' });
       throw new Error('No se pudo obtener el ID personal');
     });
 
@@ -74,9 +79,12 @@ export class AuthService {
       userId: account.id,
       personalId: userDetail.personalId,
     });
+    this.analytics.track('login_ok', {});
   }
 
-  logout() {
+  /** `reason` distinguishes a user-initiated logout from a forced 401 expiry. */
+  logout(reason: 'user' | 'expired' = 'user') {
+    this.analytics.track('logout', { reason });
     this.session.set(null);
     try {
       localStorage.removeItem(SESSION_KEY);

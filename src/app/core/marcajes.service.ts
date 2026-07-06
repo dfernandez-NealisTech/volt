@@ -11,20 +11,24 @@ import {
 import { Marcaje, PendingMarcaje } from './models';
 import { AuthService } from './auth.service';
 import { SettingsService } from './settings.service';
+import { AnalyticsService } from './analytics.service';
 
 @Injectable({ providedIn: 'root' })
 export class MarcajesService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   private settings = inject(SettingsService);
+  private analytics = inject(AnalyticsService);
 
   /** Recent marcajes (newest first). `size` widens the window when needed. */
   async fetchAll(size = 50): Promise<Marcaje[]> {
+    this.analytics.track('consulta_marcajes', { size });
     return firstValueFrom(
       this.http.get<Marcaje[]>(`${API.marcajes}?page=0&size=${size}&sort=fecha,desc`, {
         headers: this.auth.authHeaders(),
       }),
     ).catch(() => {
+      this.analytics.track('consulta_fallida', {});
       throw new Error('No se pudieron obtener los marcajes');
     });
   }
@@ -49,11 +53,15 @@ export class MarcajesService {
       zonaHoraria: TIMEZONE,
     };
 
-    return firstValueFrom(
+    const t0 = Date.now();
+    const result = await firstValueFrom(
       this.http.post<Marcaje>(API.marcajes, body, { headers: this.auth.authHeaders() }),
     ).catch(() => {
+      this.analytics.track('marcaje_fallido', { sentido, teletrabajo, ms: Date.now() - t0 });
       throw new Error('Error al enviar el marcaje');
     });
+    this.analytics.track('marcaje_creado', { sentido, teletrabajo, ms: Date.now() - t0 });
+    return result;
   }
 
   postFromLocalString(local: string, sentido: Sentido, teletrabajo: boolean) {
@@ -112,6 +120,7 @@ export class MarcajesService {
       sent++;
       onProgress?.(sent, list.length);
     }
+    this.analytics.track('dia_completo_enviado', { marcajes: sent });
     return sent;
   }
 }

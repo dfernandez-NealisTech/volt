@@ -1,4 +1,4 @@
-import { Injectable, effect, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import {
   DEFAULT_RANDOMNESS,
   Horario,
@@ -6,6 +6,7 @@ import {
   RandomnessRange,
   cloneDefaultHorarios,
 } from './config';
+import { AnalyticsService } from './analytics.service';
 
 const SCHEDULES_KEY = 'volt-schedules';
 const RANDOMNESS_KEY = 'volt-randomness';
@@ -29,6 +30,8 @@ const DEFAULT_PREFS: Prefs = {
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
+  private analytics = inject(AnalyticsService);
+
   readonly schedules = signal<Horario[]>(this.loadSchedules());
   readonly randomness = signal<RandomnessRange>(this.loadRandomness());
   readonly prefs = signal<Prefs>(this.loadPrefs());
@@ -120,6 +123,7 @@ export class SettingsService {
 
   toggleTeletrabajo(key: string, teletrabajo: boolean) {
     this.patch(key, (h) => ({ ...h, teletrabajo }));
+    this.analytics.track('teletrabajo_cambiado', { teletrabajo });
   }
 
   updateMarcaje(key: string, index: number, partial: Partial<HorarioMarcaje>) {
@@ -141,6 +145,7 @@ export class SettingsService {
         : { sentido: 'ENTRADA', hour: 9, minute: 0 };
       return { ...h, marcajes: [...h.marcajes, next] };
     });
+    this.analytics.track('horario_marcaje_anadido', {});
   }
 
   removeMarcaje(key: string, index: number) {
@@ -148,6 +153,7 @@ export class SettingsService {
       ...h,
       marcajes: h.marcajes.filter((_, i) => i !== index),
     }));
+    this.analytics.track('horario_marcaje_eliminado', {});
   }
 
   addSchedule() {
@@ -163,18 +169,22 @@ export class SettingsService {
       ],
     };
     this.schedules.update((list) => [...list, fresh]);
+    this.analytics.track('horario_anadido', {});
     return key;
   }
 
   removeSchedule(key: string) {
     this.schedules.update((list) => list.filter((h) => h.key !== key));
+    this.analytics.track('horario_eliminado', {});
   }
 
   resetSchedules() {
     this.schedules.set(cloneDefaultHorarios());
+    this.analytics.track('horarios_restablecidos', {});
   }
 
   resetRandomness() {
     this.randomness.set({ ...DEFAULT_RANDOMNESS });
+    this.analytics.track('aleatoriedad_restablecida', {});
   }
 }

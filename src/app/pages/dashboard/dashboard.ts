@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MarcajesService } from '../../core/marcajes.service';
+import { AnalyticsService } from '../../core/analytics.service';
 import { ToastService } from '../../core/toast.service';
 import { Marcaje } from '../../core/models';
 import { formatDuration, formatTime, localDateString, weekRangeLabel } from '../../core/date-utils';
@@ -18,10 +19,10 @@ import { QuickClock } from '../../shared/quick-clock';
         <h1 class="title">Semana</h1>
       </div>
       <div class="weeknav">
-        <button class="btn btn-ghost" (click)="shiftWeek(-1)" aria-label="Semana anterior">‹</button>
+        <button id="dashboard-prev-week" class="btn btn-ghost" (click)="shiftWeek(-1)" aria-label="Semana anterior">‹</button>
         <span class="range">{{ range() }}</span>
-        <button class="btn btn-ghost" (click)="shiftWeek(1)" aria-label="Semana siguiente">›</button>
-        <button class="btn btn-ghost today" (click)="goToday()">HOY</button>
+        <button id="dashboard-next-week" class="btn btn-ghost" (click)="shiftWeek(1)" aria-label="Semana siguiente">›</button>
+        <button id="dashboard-today" class="btn btn-ghost today" (click)="goToday()">HOY</button>
       </div>
     </header>
 
@@ -231,6 +232,7 @@ import { QuickClock } from '../../shared/quick-clock';
 })
 export class DashboardPage {
   private api = inject(MarcajesService);
+  private analytics = inject(AnalyticsService);
   private toasts = inject(ToastService);
 
   protected marcajes = signal<Marcaje[]>([]);
@@ -284,9 +286,11 @@ export class DashboardPage {
     const d = new Date(this.baseDate());
     d.setDate(d.getDate() + dir * 7);
     this.baseDate.set(d);
+    this.analytics.track('semana_navegada', { direccion: dir > 0 ? 'siguiente' : 'anterior' });
   }
 
   protected goToday() {
     this.baseDate.set(new Date());
+    this.analytics.track('semana_navegada', { direccion: 'hoy' });
   }
 }

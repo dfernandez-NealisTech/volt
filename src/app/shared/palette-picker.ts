@@ -14,6 +14,7 @@ import { Palette, ThemeService } from '../core/theme.service';
     <div class="pp" role="group" aria-label="Tema de color">
       @for (p of palettes; track p.id) {
         <button
+          [id]="'palette-picker-' + p.id"
           type="button"
           class="pi"
           [class.on]="theme.palette() === p.id"

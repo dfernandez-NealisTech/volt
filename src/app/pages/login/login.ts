@@ -61,7 +61,7 @@ import { PalettePicker } from '../../shared/palette-picker';
             />
           </label>
 
-          <button type="submit" class="btn btn-volt w-full mt-1" [disabled]="loading() || !f.valid">
+          <button id="login-submit" type="submit" class="btn btn-volt w-full mt-1" [disabled]="loading() || !f.valid">
             @if (loading()) {
               <span class="dots"><i></i><i></i><i></i></span>
               <span>Conectando</span>

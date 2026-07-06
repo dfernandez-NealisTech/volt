@@ -41,6 +41,7 @@ const pad2 = (n: number) => n.toString().padStart(2, '0');
   template: `
     <div class="dp">
       <button
+        id="datepicker-trigger"
         type="button"
         class="trigger"
         [class.active]="open()"
@@ -60,9 +61,9 @@ const pad2 = (n: number) => n.toString().padStart(2, '0');
       @if (open()) {
         <div class="pop" [class.up]="dropUp()" role="dialog" aria-label="Calendario">
           <div class="pop-head">
-            <button type="button" class="nav" (click)="shiftMonth(-1)" aria-label="Mes anterior">‹</button>
+            <button id="datepicker-prev-month" type="button" class="nav" (click)="shiftMonth(-1)" aria-label="Mes anterior">‹</button>
             <span class="my">{{ monthLabel() }}</span>
-            <button type="button" class="nav" (click)="shiftMonth(1)" aria-label="Mes siguiente">›</button>
+            <button id="datepicker-next-month" type="button" class="nav" (click)="shiftMonth(1)" aria-label="Mes siguiente">›</button>
           </div>
           <div class="divider"></div>
 
@@ -75,6 +76,7 @@ const pad2 = (n: number) => n.toString().padStart(2, '0');
           <div class="grid">
             @for (c of cells(); track c.key) {
               <button
+                [id]="'datepicker-cell-' + c.key"
                 type="button"
                 class="cell"
                 [class.out]="!c.inMonth"
@@ -93,24 +95,24 @@ const pad2 = (n: number) => n.toString().padStart(2, '0');
               <span class="time-lbl label">Hora</span>
               <div class="clock">
                 <div class="stepper">
-                  <button type="button" (click)="bumpHour(1)" aria-label="Hora +">▲</button>
+                  <button id="datepicker-hour-up" type="button" (click)="bumpHour(1)" aria-label="Hora +">▲</button>
                   <span class="tv mono">{{ pad(timeH()) }}</span>
-                  <button type="button" (click)="bumpHour(-1)" aria-label="Hora −">▼</button>
+                  <button id="datepicker-hour-down" type="button" (click)="bumpHour(-1)" aria-label="Hora −">▼</button>
                 </div>
                 <span class="colon mono">:</span>
                 <div class="stepper">
-                  <button type="button" (click)="bumpMin(1)" aria-label="Minuto +">▲</button>
+                  <button id="datepicker-min-up" type="button" (click)="bumpMin(1)" aria-label="Minuto +">▲</button>
                   <span class="tv mono">{{ pad(timeM()) }}</span>
-                  <button type="button" (click)="bumpMin(-1)" aria-label="Minuto −">▼</button>
+                  <button id="datepicker-min-down" type="button" (click)="bumpMin(-1)" aria-label="Minuto −">▼</button>
                 </div>
               </div>
             </div>
           }
 
           <div class="pop-foot">
-            <button type="button" class="today-btn" (click)="pickToday()">Ahora</button>
+            <button id="datepicker-now" type="button" class="today-btn" (click)="pickToday()">Ahora</button>
             @if (withTime()) {
-              <button type="button" class="done-btn" (click)="close()">Listo</button>
+              <button id="datepicker-done" type="button" class="done-btn" (click)="close()">Listo</button>
             } @else {
               <span class="sel-label mono">{{ display() }}</span>
             }

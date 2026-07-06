@@ -20,7 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((err: unknown) => {
       if (err instanceof HttpErrorResponse && err.status === 401 && auth.isAuthenticated()) {
-        auth.logout();
+        auth.logout('expired');
         router.navigate(['/login']);
       }
       return throwError(() => err);

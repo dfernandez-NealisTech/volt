@@ -6,6 +6,7 @@ import { ThemeService } from '../core/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button
+      id="theme-toggle-btn"
       type="button"
       class="toggle"
       [attr.aria-label]="theme.theme() === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'"

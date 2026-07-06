@@ -22,6 +22,7 @@ import { PalettePicker } from '../shared/palette-picker';
         <nav class="nav">
           @for (item of nav; track item.path) {
             <a
+              [id]="'shell-nav-' + item.path.slice(1)"
               class="navitem"
               [routerLink]="item.path"
               routerLinkActive="active"
@@ -62,7 +63,7 @@ import { PalettePicker } from '../shared/palette-picker';
             <theme-toggle />
             <palette-picker />
           </div>
-          <button type="button" class="logout" (click)="logout()" title="Cerrar sesión">
+          <button id="shell-logout" type="button" class="logout" (click)="logout()" title="Cerrar sesión">
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
               <path d="M14 7V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2" />
               <path d="M10 12h11M18 9l3 3-3 3" />
